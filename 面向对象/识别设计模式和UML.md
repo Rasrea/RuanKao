@@ -1,0 +1,280 @@
+## 🧠 **一、常见设计模式识别技巧**
+
+设计模式一般分为三大类：**创建型模式**、**结构型模式**、**行为型模式**。每种模式都有独特的“特征”，掌握这些特征，就能快速定位它属于哪个模式👇：
+
+### 🔹 **创建型模式**
+
+1. **单例模式**
+    - **特征**：
+        - 只有一个实例
+        - 提供一个全局访问点
+        - 常见实现：`getInstance()` 方法
+    - **示例代码**：
+   ```java
+   public class Singleton {
+       private static Singleton instance = new Singleton(); // 饿汉式单例
+
+       private Singleton() {} // 构造器私有化
+
+       public static Singleton getInstance() {
+           return instance;
+       }
+   }
+   ```
+    - **识别技巧**：  
+      👉 如果看到某个类中有`private static`实例，或者`getInstance()`，很可能是单例模式。
+
+2. **工厂模式**
+    - **特征**：
+        - 提供一个创建对象的接口
+        - 子类负责创建具体对象
+    - **示例代码**：
+   ```java
+   interface Product {
+       void create();
+   }
+
+   class ProductA implements Product {
+       public void create() {
+           System.out.println("Create Product A");
+       }
+   }
+
+   class Factory {
+       public static Product getProduct(String type) {
+           if (type.equals("A")) {
+               return new ProductA();
+           }
+           return null;
+       }
+   }
+   ```
+    - **识别技巧**：  
+      👉 如果有个方法返回某个接口或抽象类的实例，而且返回的具体类型由子类决定，那就是工厂模式。
+
+3. **建造者模式**
+    - **特征**：
+        - 将对象的创建与表示分离
+        - 使用链式调用（`Builder`）
+    - **示例代码**：
+   ```java
+   class Product {
+       private String part1;
+       private String part2;
+
+       public static class Builder {
+           private Product product = new Product();
+
+           public Builder setPart1(String part1) {
+               product.part1 = part1;
+               return this;
+           }
+
+           public Builder setPart2(String part2) {
+               product.part2 = part2;
+               return this;
+           }
+
+           public Product build() {
+               return product;
+           }
+       }
+   }
+   ```
+    - **识别技巧**：  
+      👉 如果看到链式调用（像`xxx.setA().setB().build()`），很可能是建造者模式。
+
+---
+
+### 🔸 **结构型模式**
+
+1. **适配器模式**
+    - **特征**：
+        - 将不兼容的接口通过中间类适配
+    - **示例代码**：
+   ```java
+   interface Target {
+       void request();
+   }
+
+   class Adaptee {
+       void specificRequest() {
+           System.out.println("Specific Request");
+       }
+   }
+
+   class Adapter implements Target {
+       private Adaptee adaptee;
+
+       Adapter(Adaptee adaptee) {
+           this.adaptee = adaptee;
+       }
+
+       public void request() {
+           adaptee.specificRequest();
+       }
+   }
+   ```
+    - **识别技巧**：  
+      👉 如果看到一个类“包装”了另一个类，使其接口**兼容**，就是适配器模式。
+
+2. **装饰器模式**
+    - **特征**：
+        - 在不修改原类的情况下动态扩展功能
+    - **示例代码**：
+   ```java
+   interface Component {
+       void operation();
+   }
+
+   class ConcreteComponent implements Component {
+       public void operation() {
+           System.out.println("Concrete Operation");
+       }
+   }
+
+   class Decorator implements Component {
+       private Component component;
+
+       Decorator(Component component) {
+           this.component = component;
+       }
+
+       public void operation() {
+           component.operation();
+           System.out.println("Add new behavior");
+       }
+   }
+   ```
+    - **识别技巧**：  
+      👉 如果看到一个类“包裹”另一个类，并且**扩展**其功能，基本上就是装饰器模式！
+
+3. **代理模式**
+    - **特征**：
+        - 控制对目标对象的访问
+        - 常用于权限管理或延迟加载
+    - **示例代码**：  
+   ```java
+   interface Subject {
+       void request();
+   }
+
+   class RealSubject implements Subject {
+       public void request() {
+           System.out.println("Real Request");
+       }
+   }
+
+   class Proxy implements Subject {
+       private RealSubject realSubject;
+
+       public Proxy(RealSubject realSubject) {
+           this.realSubject = realSubject;
+       }
+
+       public void request() {
+           System.out.println("Proxy Start");
+           realSubject.request();
+           System.out.println("Proxy End");
+       }
+   }
+   ```
+    - **识别技巧**：  
+      👉 如果看到某个类代表另一个类，并且可以在中间“做手脚”，那可能是代理模式。
+
+---
+
+### 🔺 **行为型模式**
+
+1. **观察者模式**
+    - **特征**：
+        - 一对多的依赖关系
+        - 主题对象通知观察者对象
+    - **示例代码**：  
+   ```java
+   import java.util.Observable;
+   import java.util.Observer;
+
+   class Subject extends Observable {
+       void changeState() {
+           setChanged();
+           notifyObservers("State Changed");
+       }
+   }
+
+   class MyObserver implements Observer {
+       public void update(Observable o, Object arg) {
+           System.out.println("State changed: " + arg);
+       }
+   }
+   ```
+    - **识别技巧**：  
+      👉 如果看到“订阅-发布”模型，或者`addObserver()`之类的关键词，可能是观察者模式。
+
+2. **策略模式**
+    - **特征**：
+        - 定义一系列算法，将它们封装起来，并使它们互相替换
+    - **示例代码**：  
+   ```java
+   interface Strategy {
+       void execute();
+   }
+
+   class ConcreteStrategyA implements Strategy {
+       public void execute() {
+           System.out.println("Execute Strategy A");
+       }
+   }
+
+   class Context {
+       private Strategy strategy;
+
+       public void setStrategy(Strategy strategy) {
+           this.strategy = strategy;
+       }
+
+       public void executeStrategy() {
+           strategy.execute();
+       }
+   }
+   ```
+    - **识别技巧**：  
+      👉 如果看到某个类在运行时动态选择算法，通常是策略模式。
+
+---
+
+## 🎯 **二、常见UML图识别技巧**
+
+在软考中，UML图主要有这几类👇：
+
+| UML 图类型 | 识别特征                      | 特征描述     | 示例                             |
+|---------|---------------------------|----------|--------------------------------|
+| **类图**  | 有类（框框）、继承（三角箭头）、组合/聚合（菱形） | 侧重静态结构   | `class`、`extends`、`implements` |
+| **对象图** | 和类图类似，但表示的是对象实例           | 侧重实例关系   | `new` 关键字                      |
+| **用例图** | 有角色（小人图标）和用例（椭圆形）         | 侧重用户交互   | 没有直接映射                         |
+| **顺序图** | 有对象、有消息（箭头）               | 侧重消息调用顺序 | 方法调用                           |
+| **状态图** | 有状态（圆角矩形）、转移（箭头）          | 侧重对象状态转换 | `if-else`、`switch-case`        |
+| **活动图** | 有活动（椭圆或矩形）、分支（菱形）         | 侧重流程逻辑   | `for`、`while`                  |
+| **组件图** | 有组件（矩形）和接口                | 侧重系统模块划分 | `package`                      |
+| **部署图** | 有设备（立方体）和节点               | 侧重物理部署结构 | 服务器、端口配置                       |
+
+---
+
+## ✅ **快速判断技巧总结**
+
+1. 看到**工厂方法**、**getInstance()** 👉 创建型模式
+2. 看到**套娃结构**或**动态增强** 👉 装饰器模式
+3. 看到**发布-订阅**或**通知** 👉 观察者模式
+4. 看到**抽象类定义框架** 👉 模板方法模式
+5. 看到**箭头和继承关系** 👉 类图
+6. 看到**小人+椭圆** 👉 用例图
+7. 看到**消息箭头** 👉 顺序图
+
+---
+
+🤓 **例子**：  
+💡 如果题目给你一张图，有多个类之间的箭头，可能是**类图**。  
+💡 如果看到一堆对象在传消息，可能是**顺序图**。  
+💡 如果看到动态加载或者“订阅-通知”，大概率是**观察者模式**。
+
+---
